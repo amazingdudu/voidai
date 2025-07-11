@@ -3,6 +3,11 @@ import enquirer from "enquirer";
 import ora from "ora";
 import OpenAI from "openai";
 
+import { marked } from "marked";
+import { markedTerminal } from "marked-terminal";
+
+marked.use(markedTerminal());
+
 const { Input } = enquirer;
 
 const client = new OpenAI({
@@ -59,7 +64,7 @@ async function chatLoop() {
           messages: [{ role: "user", content: input }],
         });
         spinner.succeed("AI响应完成");
-        console.log("AI:", completion.choices[0].message.content.trim());
+        console.log("AI:", marked.parse(completion.choices[0].message.content));
       }
     } catch (err) {
       spinner.fail("AI请求出错");
