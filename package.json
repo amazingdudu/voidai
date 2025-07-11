@@ -1,0 +1,22 @@
+{
+  "name": "terminal-chat",
+  "version": "1.0.0",
+  "main": "cli.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cli-spinners": "^3.2.0",
+    "dotenv": "^17.2.0",
+    "enquirer": "^2.4.1",
+    "marked": "^15.0.12",
+    "marked-terminal": "^7.3.0",
+    "openai": "^5.9.0",
+    "ora": "^8.2.0"
+  }
+}
