@@ -69,12 +69,12 @@ async function getUserInput(): Promise<string | null> {
     const response = await enquirer.default.prompt<{ userInput: string }>({
       type: 'input',
       name: 'userInput',
-      message: chalk.yellow(`${PROMPTS.USER_INPUT} > `),
+      message: chalk.cyan(`💬 > `),
     });
     const input = response.userInput.trim();
 
     if (!input) {
-      console.log(chalk.gray(MESSAGES.INVALID_INPUT));
+      console.log(chalk.gray(`⚠️  ${MESSAGES.INVALID_INPUT}`));
       return null;
     }
 
@@ -107,7 +107,7 @@ async function handleStreamResponse(
       const content = chunk.choices?.[0]?.delta?.content;
       if (content) {
         if (!hasResponseStarted) {
-          process.stdout.write(chalk.magenta(`${PROMPTS.AI_RESPONSE}: `));
+          process.stdout.write(chalk.magenta(`🤖 : `));
           hasResponseStarted = true;
         }
         process.stdout.write(content);
@@ -141,7 +141,8 @@ async function handleNormalResponse(
     if (!responseContent) {
       throw new Error('AI响应内容为空');
     }
-    console.log(chalk.magenta(`${PROMPTS.AI_RESPONSE}:`), marked.parse(responseContent));
+    console.log('\n');
+    console.log(chalk.magenta(`🤖 ${PROMPTS.AI_RESPONSE}: `), marked.parse(responseContent));
   } catch (error) {
     throw new Error(`AI响应错误: ${(error as Error).message}`);
   }
@@ -154,7 +155,11 @@ async function processAIRequest(
   systemPrompt: string,
   isStreamMode: boolean
 ): Promise<void> {
-  const thinkingSpinner = ora(chalk.blue(MESSAGES.THINKING)).start();
+  const thinkingSpinner = ora({
+    text: chalk.blue(`🤔 ${MESSAGES.THINKING}`),
+    color: 'blue',
+    spinner: 'dots',
+  }).start();
 
   try {
     if (isStreamMode) {
@@ -162,21 +167,21 @@ async function processAIRequest(
       await handleStreamResponse(userInput, aiClient, currentModel, systemPrompt);
     } else {
       await handleNormalResponse(userInput, aiClient, currentModel, systemPrompt);
-      thinkingSpinner.succeed(chalk.green(MESSAGES.RESPONSE_COMPLETE));
+      thinkingSpinner.succeed(chalk.green(`✅ ${MESSAGES.RESPONSE_COMPLETE}`));
       console.log('\n');
     }
   } catch (error) {
-    thinkingSpinner.fail(chalk.red(MESSAGES.REQUEST_ERROR));
+    thinkingSpinner.fail(chalk.red(`❌ ${MESSAGES.REQUEST_ERROR}`));
 
     if ((error as Error).message.includes('API key')) {
-      console.error(chalk.red('❌ API密钥无效，请检查 OPENAI_API_KEY 环境变量'));
+      console.error(chalk.red('🔑 API密钥无效，请检查 OPENAI_API_KEY 环境变量'));
     } else if (
       (error as Error).message.includes('network') ||
       (error as Error).message.includes('ENOTFOUND')
     ) {
-      console.error(chalk.red('❌ 网络连接失败，请检查网络连接和 OPENAI_BASE_URL 配置'));
+      console.error(chalk.red('🌐 网络连接失败，请检查网络连接和 OPENAI_BASE_URL 配置'));
     } else {
-      console.error(chalk.red(`❌ ${(error as Error).message}`));
+      console.error(chalk.red(`💥 ${(error as Error).message}`));
     }
     console.log('\n');
   }
@@ -188,7 +193,7 @@ export async function startChatSession(
   systemPrompt: string,
   isStreamMode: boolean
 ): Promise<void> {
-  console.log(chalk.gray('开始聊天会话，随时输入问题开始对话...\n'));
+  console.log(chalk.gray('🚀 开始聊天会话，随时输入问题开始对话...\n'));
 
   while (true) {
     const userInput = await getUserInput();
