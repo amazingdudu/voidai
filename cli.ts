@@ -20,6 +20,7 @@ import {
   createAIClient,
   validateModel,
 } from './src/index.js';
+import type { CommandOptions } from './src/types/index.js';
 
 const program = new Command();
 
@@ -29,7 +30,7 @@ program
   .version('1.0.0')
   .option('-s, --stream', '启用流式输出模式')
   .option('-m, --model <model-id>', '指定使用的模型')
-  .action(async (options) => {
+  .action(async (options: CommandOptions) => {
     const modelId = options.model;
 
     if (!validateModel(modelId)) {
@@ -37,16 +38,21 @@ program
     }
 
     try {
-      const { client, modelConfig } = createAIClient(modelId);
+      const aiClient = createAIClient(modelId);
 
       const systemPrompt =
-        process.env.SYSTEM_PROMPT ||
+        process.env['SYSTEM_PROMPT'] ||
         '你是一个人工智能助手，你更擅长中文对话。你会为用户提供安全，有帮助，准确的回答';
 
-      displayWelcomeMessage(modelConfig.model, options.stream || false);
-      await startChatSession(client, modelConfig.model, systemPrompt, options.stream || false);
+      displayWelcomeMessage(aiClient.modelConfig.model, options.stream || false);
+      await startChatSession(
+        aiClient,
+        aiClient.modelConfig.model,
+        systemPrompt,
+        options.stream || false
+      );
     } catch (error) {
-      console.error(chalk.red('❌ 应用程序初始化失败:'), error.message);
+      console.error(chalk.red('❌ 应用程序初始化失败:'), (error as Error).message);
       process.exit(1);
     }
   });

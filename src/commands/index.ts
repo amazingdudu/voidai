@@ -1,4 +1,3 @@
-// CLI命令模块统一导出
 export {
   handleConfigInit,
   handleConfigList,

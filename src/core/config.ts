@@ -3,8 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import chalk from 'chalk';
+import type { Config, ModelConfig } from '../types/index.js';
 
-const defaultConfig = {
+const defaultConfig: Config = {
   DEFAULT_MODEL: 'openai-gpt-4',
   SYSTEM_PROMPT: '你是一个人工智能助手，你更擅长中文对话。你会为用户提供安全，有帮助，准确的回答',
   MODELS: {
@@ -25,15 +26,15 @@ const defaultConfig = {
 
 const CONFIG_FILE_PATH = path.join(os.homedir(), '.termchatrc');
 
-export function getConfigPath() {
+export function getConfigPath(): string {
   return CONFIG_FILE_PATH;
 }
 
-export function configExists() {
+export function configExists(): boolean {
   return fs.existsSync(CONFIG_FILE_PATH);
 }
 
-export function loadConfig() {
+export function loadConfig(): void {
   try {
     const config = rc('termchat', defaultConfig);
 
@@ -50,22 +51,22 @@ export function loadConfig() {
         : chalk.yellow('⚠️ 配置文件不存在，请先运行 `termchat config init` 初始化配置')
     );
 
-    if (!process.env.DEFAULT_MODEL) {
-      process.env.DEFAULT_MODEL = defaultConfig.DEFAULT_MODEL;
+    if (!process.env['DEFAULT_MODEL']) {
+      process.env['DEFAULT_MODEL'] = defaultConfig['DEFAULT_MODEL'];
     }
   } catch (error) {
-    console.error(chalk.red('❌ 加载配置时出错:'), error.message);
+    console.error(chalk.red('❌ 加载配置时出错:'), (error as Error).message);
   }
 }
 
-export function createDefaultConfig() {
+export function createDefaultConfig(): boolean {
   try {
     if (configExists()) {
       console.log(chalk.yellow('⚠️ 配置文件已存在，不会覆盖现有配置'));
       return true;
     }
 
-    const configData = {
+    const configData: Config = {
       ...defaultConfig,
       SYSTEM_PROMPT:
         '你是一个人工智能助手，你更擅长中文对话。你会为用户提供安全，有帮助，准确的回答',
@@ -81,25 +82,25 @@ export function createDefaultConfig() {
 
     return true;
   } catch (error) {
-    console.error(chalk.red('❌ 创建配置文件失败:'), error.message);
+    console.error(chalk.red('❌ 创建配置文件失败:'), (error as Error).message);
     return false;
   }
 }
 
-export function readConfig() {
+export function readConfig(): Record<string, any> {
   try {
     if (!configExists()) return {};
     const content = fs.readFileSync(CONFIG_FILE_PATH, 'utf8');
     return JSON.parse(content);
   } catch (error) {
-    console.error(chalk.red('❌ 读取配置文件失败:'), error.message);
+    console.error(chalk.red('❌ 读取配置文件失败:'), (error as Error).message);
     return {};
   }
 }
 
-export function getAllConfig() {
+export function getAllConfig(): Record<string, any> {
   const config = rc('termchat', defaultConfig);
-  const filteredConfig = {};
+  const filteredConfig: Record<string, any> = {};
   Object.entries(config).forEach(([key, value]) => {
     if (!key.startsWith('_') && key !== 'config' && key !== 'configs') {
       filteredConfig[key] = value;
@@ -108,13 +109,12 @@ export function getAllConfig() {
   return filteredConfig;
 }
 
-export function getConfigValue(key) {
+export function getConfigValue(key: string): string | null {
   const config = rc('termchat', defaultConfig);
 
-  // 处理嵌套配置项，如 MODELS.modelId.field
   if (key.includes('.')) {
     const keys = key.split('.');
-    let value = config;
+    let value: any = config;
 
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
@@ -127,33 +127,33 @@ export function getConfigValue(key) {
     return value !== undefined ? String(value) : null;
   }
 
-  // 处理顶层配置项
   const value = config[key];
   return value !== undefined ? String(value) : null;
 }
 
-export function setConfigValue(key, value) {
+export function setConfigValue(key: string, value: string): boolean {
   try {
-    let existingConfig = configExists() ? readConfig() : {};
+    let existingConfig: Record<string, any> = configExists() ? readConfig() : {};
 
-    // 处理嵌套配置项，如 MODELS.modelId.field
     if (key.includes('.')) {
       const keys = key.split('.');
-      let current = existingConfig;
+      let current: any = existingConfig;
 
-      // 遍历到倒数第二个键，确保路径存在
       for (let i = 0; i < keys.length - 1; i++) {
         const k = keys[i];
-        if (!current[k] || typeof current[k] !== 'object') {
+        if (k && (!current[k] || typeof current[k] !== 'object')) {
           current[k] = {};
         }
-        current = current[k];
+        if (k) {
+          current = current[k];
+        }
       }
 
-      // 设置最后一个键的值
-      current[keys[keys.length - 1]] = value;
+      const lastKey = keys[keys.length - 1];
+      if (lastKey) {
+        current[lastKey] = value;
+      }
     } else {
-      // 处理顶层配置项
       existingConfig[key] = value;
     }
 
@@ -161,14 +161,14 @@ export function setConfigValue(key, value) {
     console.log(chalk.green(`✅ 配置已保存到: ${CONFIG_FILE_PATH}`));
     return true;
   } catch (error) {
-    console.error(chalk.red('❌ 设置配置值失败:'), error.message);
+    console.error(chalk.red('❌ 设置配置值失败:'), (error as Error).message);
     return false;
   }
 }
 
-export function getAllModels() {
+export function getAllModels(): Record<string, ModelConfig> {
   const config = rc('termchat', defaultConfig);
-  const models = { ...defaultConfig.MODELS };
+  const models: Record<string, ModelConfig> = { ...defaultConfig.MODELS };
 
   if (config.MODELS) {
     Object.assign(models, config.MODELS);
@@ -184,11 +184,14 @@ export function getAllModels() {
         const field = remainingKey.substring(firstDotIndex + 1);
 
         if (!models[modelId]) {
-          models[modelId] = { ...defaultConfig.MODELS[modelId] };
+          const defaultModel = defaultConfig.MODELS[modelId];
+          if (defaultModel) {
+            models[modelId] = { ...defaultModel };
+          }
         }
 
         if (models[modelId] && typeof models[modelId] === 'object') {
-          models[modelId][field] = value;
+          (models[modelId] as any)[field] = value;
         }
       }
     }
@@ -197,7 +200,7 @@ export function getAllModels() {
   return models;
 }
 
-export function getModelConfig(modelId) {
+export function getModelConfig(modelId: string): ModelConfig | null {
   const config = rc('termchat', defaultConfig);
 
   if (!defaultConfig.MODELS[modelId]) {
@@ -207,7 +210,7 @@ export function getModelConfig(modelId) {
     return null;
   }
 
-  const modelConfig = { ...defaultConfig.MODELS[modelId] };
+  const modelConfig: ModelConfig = { ...defaultConfig.MODELS[modelId] };
 
   if (config.MODELS && config.MODELS[modelId]) {
     Object.assign(modelConfig, config.MODELS[modelId]);
@@ -216,52 +219,54 @@ export function getModelConfig(modelId) {
   Object.entries(config).forEach(([key, value]) => {
     if (key.startsWith(`MODELS.${modelId}.`)) {
       const field = key.split('.')[2];
-      modelConfig[field] = value;
+      if (field) {
+        (modelConfig as any)[field] = value;
+      }
     }
   });
 
   return modelConfig;
 }
 
-export function getDefaultModel() {
+export function getDefaultModel(): string {
   const config = rc('termchat', defaultConfig);
-  return config.DEFAULT_MODEL || defaultConfig.DEFAULT_MODEL;
+  return config['DEFAULT_MODEL'] || defaultConfig['DEFAULT_MODEL'];
 }
 
-export function setDefaultModel(modelId) {
+export function setDefaultModel(modelId: string): boolean {
   try {
-    let existingConfig = configExists() ? readConfig() : {};
-    existingConfig.DEFAULT_MODEL = modelId;
+    let existingConfig: Record<string, any> = configExists() ? readConfig() : {};
+    existingConfig['DEFAULT_MODEL'] = modelId;
     fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(existingConfig, null, 2));
     console.log(chalk.green(`✅ 默认模型已设置为: ${modelId}`));
     return true;
   } catch (error) {
-    console.error(chalk.red('❌ 设置默认模型失败:'), error.message);
+    console.error(chalk.red('❌ 设置默认模型失败:'), (error as Error).message);
     return false;
   }
 }
 
-export function addModel(modelId, modelConfig) {
+export function addModel(modelId: string, modelConfig: ModelConfig): boolean {
   try {
-    let existingConfig = configExists() ? readConfig() : {};
-    if (!existingConfig.MODELS) {
-      existingConfig.MODELS = {};
+    let existingConfig: Record<string, any> = configExists() ? readConfig() : {};
+    if (!existingConfig['MODELS']) {
+      existingConfig['MODELS'] = {};
     }
-    existingConfig.MODELS[modelId] = modelConfig;
+    existingConfig['MODELS'][modelId] = modelConfig;
     fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(existingConfig, null, 2));
     console.log(chalk.green(`✅ 已添加模型: ${modelId}`));
     return true;
   } catch (error) {
-    console.error(chalk.red('❌ 添加模型失败:'), error.message);
+    console.error(chalk.red('❌ 添加模型失败:'), (error as Error).message);
     return false;
   }
 }
 
-export function removeModel(modelId) {
+export function removeModel(modelId: string): boolean {
   try {
-    let existingConfig = configExists() ? readConfig() : {};
-    if (existingConfig.MODELS && existingConfig.MODELS[modelId]) {
-      delete existingConfig.MODELS[modelId];
+    let existingConfig: Record<string, any> = configExists() ? readConfig() : {};
+    if (existingConfig['MODELS'] && existingConfig['MODELS'][modelId]) {
+      delete existingConfig['MODELS'][modelId];
       fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(existingConfig, null, 2));
       console.log(chalk.green(`✅ 已删除模型: ${modelId}`));
       return true;
@@ -270,16 +275,16 @@ export function removeModel(modelId) {
       return false;
     }
   } catch (error) {
-    console.error(chalk.red('❌ 删除模型失败:'), error.message);
+    console.error(chalk.red('❌ 删除模型失败:'), (error as Error).message);
     return false;
   }
 }
 
-export function updateModel(modelId, updates) {
+export function updateModel(modelId: string, updates: Partial<ModelConfig>): boolean {
   try {
-    let existingConfig = configExists() ? readConfig() : {};
-    if (existingConfig.MODELS && existingConfig.MODELS[modelId]) {
-      existingConfig.MODELS[modelId] = { ...existingConfig.MODELS[modelId], ...updates };
+    let existingConfig: Record<string, any> = configExists() ? readConfig() : {};
+    if (existingConfig['MODELS'] && existingConfig['MODELS'][modelId]) {
+      existingConfig['MODELS'][modelId] = { ...existingConfig['MODELS'][modelId], ...updates };
       fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(existingConfig, null, 2));
       console.log(chalk.green(`✅ 已更新模型: ${modelId}`));
       return true;
@@ -288,7 +293,7 @@ export function updateModel(modelId, updates) {
       return false;
     }
   } catch (error) {
-    console.error(chalk.red('❌ 更新模型失败:'), error.message);
+    console.error(chalk.red('❌ 更新模型失败:'), (error as Error).message);
     return false;
   }
 }

@@ -24,7 +24,7 @@ function createASCIITitle() {
   }
 }
 
-export function displayWelcomeMessage(currentModel, isStreamMode) {
+export function displayWelcomeMessage(currentModel: string, isStreamMode: boolean) {
   console.log('\n');
   console.log(createASCIITitle());
   console.log('\n');

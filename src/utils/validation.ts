@@ -1,5 +1,5 @@
-export function validateModelId(modelId) {
-  if (!modelId || typeof modelId !== 'string') {
+export function validateModelId(modelId: string) {
+  if (!modelId) {
     return false;
   }
 
@@ -7,16 +7,16 @@ export function validateModelId(modelId) {
   return modelIdRegex.test(modelId);
 }
 
-export function validateApiKey(apiKey) {
-  if (!apiKey || typeof apiKey !== 'string') {
+export function validateApiKey(apiKey: string) {
+  if (!apiKey) {
     return false;
   }
 
   return apiKey.startsWith('sk-') && apiKey.length > 10;
 }
 
-export function validateUrl(url) {
-  if (!url || typeof url !== 'string') {
+export function validateUrl(url: string) {
+  if (!url) {
     return false;
   }
 
@@ -28,8 +28,8 @@ export function validateUrl(url) {
   }
 }
 
-export function validateModelName(modelName) {
-  if (!modelName || typeof modelName !== 'string') {
+export function validateModelName(modelName: string) {
+  if (!modelName) {
     return false;
   }
 

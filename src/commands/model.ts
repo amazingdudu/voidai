@@ -14,8 +14,9 @@ import {
   validateUrl,
   validateModelName,
 } from '../utils/validation.js';
+import type { ModelCommandOptions, ModelConfig } from '../types/index.js';
 
-export function handleModelList(options = {}) {
+export function handleModelList(options: ModelCommandOptions = {}) {
   const models = getAllModels();
   const defaultModelId = getDefaultModel();
 
@@ -40,7 +41,6 @@ export function handleModelList(options = {}) {
     return;
   }
 
-  // 显示详细信息
   console.log(chalk.cyan.bold('\n📋 可用模型列表:\n'));
 
   for (const [modelId, model] of Object.entries(models)) {
@@ -61,7 +61,7 @@ export function handleModelList(options = {}) {
   console.log(chalk.cyan('💡 使用 `termchat model list --id` 只显示模型ID'));
 }
 
-export function handleModelSet(modelId) {
+export function handleModelSet(modelId?: string) {
   if (!modelId) {
     console.log(chalk.red('❌ 使用方法: termchat model set <model-id>'));
     console.log(chalk.yellow('💡 示例: termchat model set openai-gpt-4'));
@@ -89,12 +89,13 @@ export async function handleModelAdd() {
 
   try {
     const enquirer = await import('enquirer');
-    const { Input } = enquirer.default;
 
-    const modelId = await new Input({
+    const modelIdResponse = await enquirer.default.prompt({
+      type: 'input',
+      name: 'modelId',
       message: '模型ID (用于标识模型):',
       initial: 'custom-model',
-      validate: (value) => {
+      validate: (value: string) => {
         if (!validateModelId(value)) {
           return '模型ID只能包含字母、数字、连字符和下划线';
         }
@@ -104,61 +105,57 @@ export async function handleModelAdd() {
         }
         return true;
       },
-      onCancel: () => {
-        console.log(chalk.green('\n👋 取消添加模型'));
-        process.exit(0);
-      },
-    }).run();
+    });
 
-    const baseURL = await new Input({
+    const baseURLResponse = await enquirer.default.prompt({
+      type: 'input',
+      name: 'baseURL',
       message: 'API基础URL:',
       initial: 'https://',
-      validate: (value) => {
+      validate: (value: string) => {
         if (value && !validateUrl(value)) {
           return 'URL格式无效';
         }
         return true;
       },
-      onCancel: () => {
-        console.log(chalk.green('\n👋 取消添加模型'));
-        process.exit(0);
-      },
-    }).run();
+    });
 
-    const apiKey = await new Input({
+    const apiKeyResponse = await enquirer.default.prompt({
+      type: 'input',
+      name: 'apiKey',
       message: 'API密钥:',
       initial: 'sk-',
-      validate: (value) => {
+      validate: (value: string) => {
         if (!validateApiKey(value)) {
           return 'API密钥格式无效，应以sk-开头';
         }
         return true;
       },
-      onCancel: () => {
-        console.log(chalk.green('\n👋 取消添加模型'));
-        process.exit(0);
-      },
-    }).run();
+    });
 
-    const model = await new Input({
+    const modelResponse = await enquirer.default.prompt({
+      type: 'input',
+      name: 'model',
       message: '模型名称 (API模型标识符):',
       initial: 'gpt-3.5-turbo',
-      validate: (value) => {
+      validate: (value: string) => {
         if (!validateModelName(value)) {
           return '模型名称只能包含字母、数字、连字符、点和下划线';
         }
         return true;
       },
-      onCancel: () => {
-        console.log(chalk.green('\n👋 取消添加模型'));
-        process.exit(0);
-      },
-    }).run();
+    });
+
+    const modelId = (modelIdResponse as any).modelId;
+    const baseURL = (baseURLResponse as any).baseURL;
+    const apiKey = (apiKeyResponse as any).apiKey;
+    const model = (modelResponse as any).model;
 
     const success = addModel(modelId, {
-      baseURL: baseURL || undefined,
+      baseURL: baseURL || '',
       apiKey: apiKey,
       model: model,
+      description: `自定义模型: ${model}`,
     });
 
     if (success) {
@@ -168,12 +165,12 @@ export async function handleModelAdd() {
       console.log(chalk.red('❌ 添加模型失败'));
     }
   } catch (error) {
-    const errorMessage = error?.message || '';
+    const errorMessage = (error as any)?.message || '';
     console.error(chalk.red('❌ 添加模型失败:'), errorMessage || error);
   }
 }
 
-export async function handleModelRemove(modelId) {
+export async function handleModelRemove(modelId?: string) {
   if (!modelId) {
     console.log(chalk.red('❌ 使用方法: termchat model remove <model-id>'));
     console.log(chalk.yellow('💡 示例: termchat model remove openai-gpt-4'));
@@ -199,7 +196,7 @@ export async function handleModelRemove(modelId) {
   }
 }
 
-export function handleModelConfig(modelId) {
+export function handleModelConfig(modelId?: string) {
   if (!modelId) {
     console.log(chalk.red('❌ 使用方法: termchat model config <model-id>'));
     console.log(chalk.yellow('💡 示例: termchat model config openai-gpt-4'));
@@ -229,7 +226,7 @@ export function handleModelConfig(modelId) {
   );
 }
 
-export async function handleModelUpdate(modelId, field, value) {
+export async function handleModelUpdate(modelId?: string, field?: string, value?: string) {
   if (!modelId || !field || value === undefined) {
     console.log(chalk.red('❌ 使用方法: termchat model update <model-id> <field> <value>'));
     console.log(chalk.yellow('💡 示例: termchat model update openai-gpt-4 apiKey your-api-key'));
@@ -256,7 +253,7 @@ export async function handleModelUpdate(modelId, field, value) {
 
   console.log(chalk.cyan.bold(`\n🔧 更新模型配置: ${model.model}\n`));
 
-  const currentValue = model[field];
+  const currentValue = (model as any)[field];
   if (currentValue) {
     const displayValue =
       field === 'apiKey'
@@ -271,7 +268,7 @@ export async function handleModelUpdate(modelId, field, value) {
     field === 'apiKey' ? `${value.substring(0, 4)}...${value.substring(value.length - 4)}` : value;
   console.log(`新 ${field}: ${chalk.white(displayNewValue)}\n`);
 
-  const success = updateModel(modelId, { [field]: value });
+  const success = updateModel(modelId, { [field]: value } as Partial<ModelConfig>);
   if (success) {
     console.log(chalk.green(`✅ 已更新 ${field} = ${displayNewValue}`));
   } else {
@@ -284,7 +281,6 @@ export async function handleModelSelect() {
 
   try {
     const enquirer = await import('enquirer');
-    const { Select } = enquirer.default;
 
     const models = getAllModels();
     const defaultModelId = getDefaultModel();
@@ -309,19 +305,19 @@ export async function handleModelSelect() {
       };
     });
 
-    const selectedModelId = await new Select({
+    const response = await enquirer.default.prompt({
+      type: 'select',
+      name: 'selectedModelId',
       message: '选择要查看的模型:',
       choices: choices,
       initial: defaultModelId,
-      onCancel: () => {
-        console.log(chalk.green('\n👋 取消选择模型'));
-        process.exit(0);
-      },
-    }).run();
+    } as any);
+
+    const selectedModelId = (response as any).selectedModelId;
 
     handleModelSet(selectedModelId);
   } catch (error) {
-    const errorMessage = error?.message || '';
+    const errorMessage = (error as any)?.message || '';
     console.error(chalk.red('❌ 选择模型失败:'), errorMessage || error);
   }
 }

@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
 import { getModelConfig, getDefaultModel } from './config.js';
 import chalk from 'chalk';
+import type { AIClient } from '../types/index.js';
 
-export function createAIClient(modelId = null) {
+export function createAIClient(modelId: string | null = null): AIClient {
   const targetModelId = modelId || getDefaultModel();
   const modelConfig = getModelConfig(targetModelId);
 
@@ -19,14 +20,13 @@ export function createAIClient(modelId = null) {
     apiKey: modelConfig.apiKey,
   });
 
-  return {
-    client,
+  return Object.assign(client, {
     modelConfig,
     modelId: targetModelId,
-  };
+  });
 }
 
-export function validateModel(modelId = null) {
+export function validateModel(modelId: string | null = null): boolean {
   const targetModelId = modelId || getDefaultModel();
   const modelConfig = getModelConfig(targetModelId);
 

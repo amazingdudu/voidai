@@ -41,16 +41,16 @@ export function handleConfigList() {
 
   console.log(chalk.yellow(`配置文件: ${getConfigPath()}\n`));
 
-  const categories = {
+  const categories: Record<string, string[]> = {
     基本设置: ['DEFAULT_MODEL', 'SYSTEM_PROMPT'],
     模型配置: [],
   };
 
-  const uncategorized = [];
+  const uncategorized: string[] = [];
   for (const key of Object.keys(allConfig)) {
     if (key === 'MODELS') {
-      categories['模型配置'].push(key);
-    } else if (categories['基本设置'].includes(key)) {
+      categories['模型配置']?.push(key);
+    } else if (categories['基本设置']?.includes(key)) {
       continue;
     } else {
       uncategorized.push(key);
@@ -62,7 +62,7 @@ export function handleConfigList() {
   }
 
   for (const [category, keys] of Object.entries(categories)) {
-    if (keys.length === 0) continue;
+    if (!keys || keys.length === 0) continue;
 
     console.log(chalk.blue.bold(`${category}:`));
     for (const key of keys) {
@@ -75,9 +75,11 @@ export function handleConfigList() {
           const defaultModel = getDefaultModel();
           for (const [modelId, model] of Object.entries(models)) {
             const isDefault = modelId === defaultModel;
-            const status = model.apiKey ? chalk.green('✅') : chalk.red('❌');
+            const status = (model as any).apiKey ? chalk.green('✅') : chalk.red('❌');
             const defaultMark = isDefault ? chalk.yellow(' (默认)') : '';
-            console.log(`    ${status} ${chalk.gray(modelId)}${defaultMark} - ${model.model}`);
+            console.log(
+              `    ${status} ${chalk.gray(modelId)}${defaultMark} - ${(model as any).model}`
+            );
           }
           console.log(chalk.cyan('    💡 使用 `termchat model list` 查看详细模型信息'));
           console.log(
@@ -103,7 +105,7 @@ export function handleConfigList() {
   console.log(`  ${configExists() ? chalk.green('存在') : chalk.gray('不存在')}`);
 }
 
-export function handleConfigGet(key) {
+export function handleConfigGet(key?: string) {
   if (!key) {
     console.log(chalk.red('❌ 使用方法: termchat config get <key>'));
     console.log(chalk.yellow('💡 示例: termchat config get DEFAULT_MODEL'));
@@ -132,7 +134,7 @@ export function handleConfigGet(key) {
   }
 }
 
-export async function handleConfigSet(key, value) {
+export async function handleConfigSet(key?: string, value?: string) {
   if (!key || value === undefined) {
     console.log(chalk.red('❌ 使用方法: termchat config set <key> <value>'));
     console.log(chalk.yellow('💡 示例: termchat config set DEFAULT_MODEL openai-gpt-4'));
@@ -192,7 +194,7 @@ export async function handleConfigDelete() {
   console.log(`  ${chalk.white(configPath)}\n`);
 
   const allConfig = getAllConfig();
-  const modelCount = allConfig.MODELS ? Object.keys(allConfig.MODELS).length : 0;
+  const modelCount = allConfig['MODELS'] ? Object.keys(allConfig['MODELS']).length : 0;
 
   console.log(chalk.red('⚠️ 删除配置文件将导致以下影响:'));
   console.log(chalk.red(`  • 所有配置项将被删除`));
@@ -203,16 +205,15 @@ export async function handleConfigDelete() {
 
   try {
     const enquirer = await import('enquirer');
-    const { Confirm } = enquirer.default;
 
-    const confirmed = await new Confirm({
+    const response = await enquirer.default.prompt({
+      type: 'confirm',
+      name: 'confirmed',
       message: '确定要删除配置文件吗？',
       initial: false,
-      onCancel: () => {
-        console.log(chalk.green('\n👋 取消删除配置文件'));
-        process.exit(0);
-      },
-    }).run();
+    });
+
+    const confirmed = (response as any).confirmed;
 
     if (confirmed) {
       const fs = await import('fs');
@@ -223,7 +224,7 @@ export async function handleConfigDelete() {
       console.log(chalk.green('👋 取消删除配置文件'));
     }
   } catch (error) {
-    const errorMessage = error?.message || '';
+    const errorMessage = (error as any)?.message || '';
     console.error(chalk.red('❌ 删除配置文件失败:'), errorMessage || error);
   }
 }

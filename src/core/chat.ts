@@ -3,11 +3,10 @@ import ora from 'ora';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import chalk from 'chalk';
-import { displayWelcomeMessage } from '../ui/components.js';
+import { displayWelcomeMessage, displayHelpMessage } from '../ui/components.js';
+import type { AIClient } from '../types/index.js';
 
-marked.use(markedTerminal());
-
-const { Input } = enquirer;
+marked.use(markedTerminal() as any);
 
 const COMMANDS = {
   EXIT: ['exit', 'quit', 'bye', '退出', '再见'],
@@ -29,19 +28,23 @@ const PROMPTS = {
   AI_RESPONSE: 'AI',
 };
 
-function isExitCommand(input) {
+function isExitCommand(input: string): boolean {
   return COMMANDS.EXIT.includes(input.toLowerCase());
 }
 
-function isClearCommand(input) {
+function isClearCommand(input: string): boolean {
   return COMMANDS.CLEAR.includes(input.toLowerCase());
 }
 
-function isHelpCommand(input) {
+function isHelpCommand(input: string): boolean {
   return COMMANDS.HELP.includes(input.toLowerCase());
 }
 
-function handleSpecialCommands(input, currentModel, isStreamMode) {
+function handleSpecialCommands(
+  input: string,
+  currentModel: string,
+  isStreamMode: boolean
+): boolean {
   if (isExitCommand(input)) {
     console.log(chalk.green(`\n${MESSAGES.GOODBYE}`));
     process.exit(0);
@@ -61,12 +64,14 @@ function handleSpecialCommands(input, currentModel, isStreamMode) {
   return false;
 }
 
-async function getUserInput() {
+async function getUserInput(): Promise<string | null> {
   try {
-    const prompt = new Input({
+    const response = await enquirer.prompt({
+      type: 'input',
+      name: 'userInput',
       message: chalk.yellow(`${PROMPTS.USER_INPUT} > `),
     });
-    const input = (await prompt.run()).trim();
+    const input = (response as any).userInput.trim();
 
     if (!input) {
       console.log(chalk.gray(MESSAGES.INVALID_INPUT));
@@ -80,7 +85,12 @@ async function getUserInput() {
   }
 }
 
-async function handleStreamResponse(userInput, aiClient, currentModel, systemPrompt) {
+async function handleStreamResponse(
+  userInput: string,
+  aiClient: AIClient,
+  currentModel: string,
+  systemPrompt: string
+): Promise<void> {
   let hasResponseStarted = false;
 
   try {
@@ -93,7 +103,7 @@ async function handleStreamResponse(userInput, aiClient, currentModel, systemPro
       stream: true,
     });
 
-    for await (const chunk of stream) {
+    for await (const chunk of stream as AsyncIterable<any>) {
       const content = chunk.choices?.[0]?.delta?.content;
       if (content) {
         if (!hasResponseStarted) {
@@ -108,28 +118,39 @@ async function handleStreamResponse(userInput, aiClient, currentModel, systemPro
       process.stdout.write('\n\n');
     }
   } catch (error) {
-    throw new Error(`流式响应错误: ${error.message}`);
+    throw new Error(`流式响应错误: ${(error as Error).message}`);
   }
 }
 
-async function handleNormalResponse(userInput, aiClient, currentModel, systemPrompt) {
+async function handleNormalResponse(
+  userInput: string,
+  aiClient: AIClient,
+  currentModel: string,
+  systemPrompt: string
+): Promise<void> {
   try {
-    const completion = await aiClient.chat.completions.create({
+    const completion = (await aiClient.chat.completions.create({
       model: currentModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userInput },
       ],
-    });
+    })) as any;
 
     const responseContent = completion.choices[0].message.content;
     console.log(chalk.magenta(`${PROMPTS.AI_RESPONSE}:`), marked.parse(responseContent));
   } catch (error) {
-    throw new Error(`AI响应错误: ${error.message}`);
+    throw new Error(`AI响应错误: ${(error as Error).message}`);
   }
 }
 
-async function processAIRequest(userInput, aiClient, currentModel, systemPrompt, isStreamMode) {
+async function processAIRequest(
+  userInput: string,
+  aiClient: AIClient,
+  currentModel: string,
+  systemPrompt: string,
+  isStreamMode: boolean
+): Promise<void> {
   const thinkingSpinner = ora(chalk.blue(MESSAGES.THINKING)).start();
 
   try {
@@ -144,18 +165,26 @@ async function processAIRequest(userInput, aiClient, currentModel, systemPrompt,
   } catch (error) {
     thinkingSpinner.fail(chalk.red(MESSAGES.REQUEST_ERROR));
 
-    if (error.message.includes('API key')) {
+    if ((error as Error).message.includes('API key')) {
       console.error(chalk.red('❌ API密钥无效，请检查 OPENAI_API_KEY 环境变量'));
-    } else if (error.message.includes('network') || error.message.includes('ENOTFOUND')) {
+    } else if (
+      (error as Error).message.includes('network') ||
+      (error as Error).message.includes('ENOTFOUND')
+    ) {
       console.error(chalk.red('❌ 网络连接失败，请检查网络连接和 OPENAI_BASE_URL 配置'));
     } else {
-      console.error(chalk.red(`❌ ${error.message}`));
+      console.error(chalk.red(`❌ ${(error as Error).message}`));
     }
     console.log('\n');
   }
 }
 
-export async function startChatSession(aiClient, currentModel, systemPrompt, isStreamMode) {
+export async function startChatSession(
+  aiClient: AIClient,
+  currentModel: string,
+  systemPrompt: string,
+  isStreamMode: boolean
+): Promise<void> {
   console.log(chalk.gray('开始聊天会话，随时输入问题开始对话...\n'));
 
   while (true) {
