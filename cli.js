@@ -2,7 +2,7 @@ import 'dotenv/config';
 import enquirer from 'enquirer';
 import ora from 'ora';
 import OpenAI from 'openai';
-
+import boxen from 'boxen';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import chalk from 'chalk';
@@ -16,12 +16,38 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const systemPrompt =
+  process.env.SYSTEM_PROMPT ||
+  '你是一个人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答';
+
 const useStream = process.argv.includes('--stream');
 
-console.log(chalk.green.bold('欢迎使用AI终端助手！直接输入你的问题与AI对话。'));
-console.log(
-  chalk.cyan(`当前模式：${useStream ? '流式输出' : '普通输出'}（可用 --stream 参数切换）`)
+const modelInfo = chalk.yellow(`当前模型：${process.env.OPENAI_MODEL}`);
+const modeInfo = chalk.cyan(
+  `当前模式：${useStream ? '流式输出' : '普通输出'}（可用 --stream 参数切换）`
 );
+
+const welcomeBox = boxen(
+  `${chalk.green.bold('✨ 欢迎使用 AI 终端助手 ✨')}
+
+${chalk.white('直接输入你的问题与 AI 对话')}
+
+${modelInfo}
+
+${modeInfo}`,
+  {
+    padding: 1,
+    margin: 1,
+    borderStyle: 'round',
+    borderColor: 'green',
+    backgroundColor: '#222',
+    textAlignment: 'center',
+    title: chalk.white.bold(' AI 终端助手 '),
+    titleAlignment: 'center',
+  }
+);
+
+console.log(welcomeBox);
 console.log('\n');
 
 async function chatLoop() {
@@ -47,7 +73,10 @@ async function chatLoop() {
 
         const stream = await client.chat.completions.create({
           model: process.env.OPENAI_MODEL,
-          messages: [{ role: 'user', content: input }],
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: input },
+          ],
           stream: true,
         });
 
@@ -67,7 +96,10 @@ async function chatLoop() {
       } else {
         const completion = await client.chat.completions.create({
           model: process.env.OPENAI_MODEL,
-          messages: [{ role: 'user', content: input }],
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: input },
+          ],
         });
 
         spinner.succeed(chalk.green('AI响应完成'));
