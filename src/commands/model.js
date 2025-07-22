@@ -214,8 +214,6 @@ export function handleModelConfig(modelId) {
     return;
   }
 
-  const defaultModelId = getDefaultModel();
-
   console.log(chalk.cyan.bold(`\n📋 模型配置: ${model.model}\n`));
 
   console.log(chalk.yellow('基本信息:'));
@@ -321,7 +319,7 @@ export async function handleModelSelect() {
       },
     }).run();
 
-    handleModelConfig(selectedModelId);
+    handleModelSet(selectedModelId);
   } catch (error) {
     const errorMessage = error?.message || '';
     console.error(chalk.red('❌ 选择模型失败:'), errorMessage || error);
