@@ -37,6 +37,10 @@ function isClearCommand(input) {
   return COMMANDS.CLEAR.includes(input.toLowerCase());
 }
 
+function isHelpCommand(input) {
+  return COMMANDS.HELP.includes(input.toLowerCase());
+}
+
 function handleSpecialCommands(input, currentModel, isStreamMode) {
   if (isExitCommand(input)) {
     console.log(chalk.green(`\n${MESSAGES.GOODBYE}`));
