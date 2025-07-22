@@ -46,19 +46,19 @@ export function handleConfigList() {
     模型配置: [],
   };
 
-  const uncategorized: string[] = [];
+  const otherKeys: string[] = [];
   for (const key of Object.keys(allConfig)) {
     if (key === 'MODELS') {
       categories['模型配置']?.push(key);
     } else if (categories['基本设置']?.includes(key)) {
       continue;
     } else {
-      uncategorized.push(key);
+      otherKeys.push(key);
     }
   }
 
-  if (uncategorized.length > 0) {
-    categories['其他设置'] = uncategorized;
+  if (otherKeys.length > 0) {
+    categories['其他设置'] = otherKeys;
   }
 
   for (const [category, keys] of Object.entries(categories)) {
