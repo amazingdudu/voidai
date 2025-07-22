@@ -206,7 +206,7 @@ export async function handleConfigDelete() {
   try {
     const enquirer = await import('enquirer');
 
-    const response = await enquirer.prompt<{ confirmed: boolean }>({
+    const response = await enquirer.default.prompt<{ confirmed: boolean }>({
       type: 'confirm',
       name: 'confirmed',
       message: '确定要删除配置文件吗？',

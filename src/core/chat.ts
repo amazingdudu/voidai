@@ -1,4 +1,3 @@
-import enquirer from 'enquirer';
 import ora from 'ora';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
@@ -66,7 +65,8 @@ function handleSpecialCommands(
 
 async function getUserInput(): Promise<string | null> {
   try {
-    const response = await enquirer.prompt<{ userInput: string }>({
+    const enquirer = await import('enquirer');
+    const response = await enquirer.default.prompt<{ userInput: string }>({
       type: 'input',
       name: 'userInput',
       message: chalk.yellow(`${PROMPTS.USER_INPUT} > `),
