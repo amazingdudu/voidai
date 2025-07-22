@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+
 import {
   createDefaultConfig,
   getAllConfig,
@@ -8,6 +9,7 @@ import {
   configExists,
   getDefaultModel,
 } from '../core/config.js';
+import type { ModelConfig } from '../types/index.js';
 
 export function handleConfigInit() {
   console.log(chalk.cyan.bold('\n🔧 初始化配置文件\n'));
@@ -67,7 +69,7 @@ export function handleConfigList() {
     console.log(chalk.blue.bold(`${category}:`));
     for (const key of keys) {
       if (key === 'MODELS') {
-        const models = allConfig[key];
+        const models = allConfig[key] as Record<string, ModelConfig>;
         if (models && Object.keys(models).length > 0) {
           console.log(
             `  ${chalk.green('MODELS'.padEnd(20))}: ${chalk.white(`${Object.keys(models).length} 个模型`)}`
@@ -75,11 +77,9 @@ export function handleConfigList() {
           const defaultModel = getDefaultModel();
           for (const [modelId, model] of Object.entries(models)) {
             const isDefault = modelId === defaultModel;
-            const status = (model as any).apiKey ? chalk.green('✅') : chalk.red('❌');
+            const status = model.apiKey ? chalk.green('✅') : chalk.red('❌');
             const defaultMark = isDefault ? chalk.yellow(' (默认)') : '';
-            console.log(
-              `    ${status} ${chalk.gray(modelId)}${defaultMark} - ${(model as any).model}`
-            );
+            console.log(`    ${status} ${chalk.gray(modelId)}${defaultMark} - ${model.model}`);
           }
           console.log(chalk.cyan('    💡 使用 `termchat model list` 查看详细模型信息'));
           console.log(
@@ -206,14 +206,14 @@ export async function handleConfigDelete() {
   try {
     const enquirer = await import('enquirer');
 
-    const response = await enquirer.default.prompt({
+    const response = await enquirer.prompt<{ confirmed: boolean }>({
       type: 'confirm',
       name: 'confirmed',
       message: '确定要删除配置文件吗？',
       initial: false,
     });
 
-    const confirmed = (response as any).confirmed;
+    const confirmed = response.confirmed;
 
     if (confirmed) {
       const fs = await import('fs');

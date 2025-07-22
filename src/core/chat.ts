@@ -66,12 +66,12 @@ function handleSpecialCommands(
 
 async function getUserInput(): Promise<string | null> {
   try {
-    const response = await enquirer.prompt({
+    const response = await enquirer.prompt<{ userInput: string }>({
       type: 'input',
       name: 'userInput',
       message: chalk.yellow(`${PROMPTS.USER_INPUT} > `),
     });
-    const input = (response as any).userInput.trim();
+    const input = response.userInput.trim();
 
     if (!input) {
       console.log(chalk.gray(MESSAGES.INVALID_INPUT));
@@ -103,7 +103,7 @@ async function handleStreamResponse(
       stream: true,
     });
 
-    for await (const chunk of stream as AsyncIterable<any>) {
+    for await (const chunk of stream) {
       const content = chunk.choices?.[0]?.delta?.content;
       if (content) {
         if (!hasResponseStarted) {
@@ -129,15 +129,18 @@ async function handleNormalResponse(
   systemPrompt: string
 ): Promise<void> {
   try {
-    const completion = (await aiClient.chat.completions.create({
+    const completion = await aiClient.chat.completions.create({
       model: currentModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userInput },
       ],
-    })) as any;
+    });
 
-    const responseContent = completion.choices[0].message.content;
+    const responseContent = completion.choices?.[0]?.message?.content;
+    if (!responseContent) {
+      throw new Error('AI响应内容为空');
+    }
     console.log(chalk.magenta(`${PROMPTS.AI_RESPONSE}:`), marked.parse(responseContent));
   } catch (error) {
     throw new Error(`AI响应错误: ${(error as Error).message}`);

@@ -181,7 +181,7 @@ export function getAllModels(): Record<string, ModelConfig> {
 
       if (firstDotIndex > 0) {
         const modelId = remainingKey.substring(0, firstDotIndex);
-        const field = remainingKey.substring(firstDotIndex + 1);
+        const field = remainingKey.substring(firstDotIndex + 1) as keyof ModelConfig;
 
         if (!models[modelId]) {
           const defaultModel = defaultConfig.MODELS[modelId];
@@ -191,7 +191,7 @@ export function getAllModels(): Record<string, ModelConfig> {
         }
 
         if (models[modelId] && typeof models[modelId] === 'object') {
-          (models[modelId] as any)[field] = value;
+          models[modelId][field] = value;
         }
       }
     }
@@ -218,9 +218,9 @@ export function getModelConfig(modelId: string): ModelConfig | null {
 
   Object.entries(config).forEach(([key, value]) => {
     if (key.startsWith(`MODELS.${modelId}.`)) {
-      const field = key.split('.')[2];
+      const field = key.split('.')[2] as keyof ModelConfig;
       if (field) {
-        (modelConfig as any)[field] = value;
+        modelConfig[field] = value;
       }
     }
   });

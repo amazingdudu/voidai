@@ -90,66 +90,67 @@ export async function handleModelAdd() {
   try {
     const enquirer = await import('enquirer');
 
-    const modelIdResponse = await enquirer.default.prompt({
-      type: 'input',
-      name: 'modelId',
-      message: '模型ID (用于标识模型):',
-      initial: 'custom-model',
-      validate: (value: string) => {
-        if (!validateModelId(value)) {
-          return '模型ID只能包含字母、数字、连字符和下划线';
-        }
-        const models = getAllModels();
-        if (models[value]) {
-          return '模型ID已存在';
-        }
-        return true;
+    const response = await enquirer.default.prompt<{
+      modelId: string;
+      baseURL: string;
+      apiKey: string;
+      model: string;
+    }>([
+      {
+        type: 'input',
+        name: 'modelId',
+        message: '模型ID (用于标识模型):',
+        initial: 'custom-model',
+        validate: (value: string) => {
+          if (!validateModelId(value)) {
+            return '模型ID只能包含字母、数字、连字符和下划线';
+          }
+          const models = getAllModels();
+          if (models[value]) {
+            return '模型ID已存在';
+          }
+          return true;
+        },
       },
-    });
-
-    const baseURLResponse = await enquirer.default.prompt({
-      type: 'input',
-      name: 'baseURL',
-      message: 'API基础URL:',
-      initial: 'https://',
-      validate: (value: string) => {
-        if (value && !validateUrl(value)) {
-          return 'URL格式无效';
-        }
-        return true;
+      {
+        type: 'input',
+        name: 'baseURL',
+        message: 'API基础URL:',
+        initial: 'https://',
+        validate: (value: string) => {
+          if (value && !validateUrl(value)) {
+            return 'URL格式无效';
+          }
+          return true;
+        },
       },
-    });
-
-    const apiKeyResponse = await enquirer.default.prompt({
-      type: 'input',
-      name: 'apiKey',
-      message: 'API密钥:',
-      initial: 'sk-',
-      validate: (value: string) => {
-        if (!validateApiKey(value)) {
-          return 'API密钥格式无效，应以sk-开头';
-        }
-        return true;
+      {
+        type: 'input',
+        name: 'apiKey',
+        message: 'API密钥:',
+        initial: 'sk-',
+        validate: (value: string) => {
+          if (!validateApiKey(value)) {
+            return 'API密钥格式无效，应以sk-开头';
+          }
+          return true;
+        },
       },
-    });
-
-    const modelResponse = await enquirer.default.prompt({
-      type: 'input',
-      name: 'model',
-      message: '模型名称 (API模型标识符):',
-      initial: 'gpt-3.5-turbo',
-      validate: (value: string) => {
-        if (!validateModelName(value)) {
-          return '模型名称只能包含字母、数字、连字符、点和下划线';
-        }
-        return true;
+      {
+        type: 'input',
+        name: 'model',
+        message: '模型名称 (API模型标识符):',
+        initial: 'gpt-3.5-turbo',
+        validate: (value: string) => {
+          if (!validateModelName(value)) {
+            return '模型名称只能包含字母、数字、连字符、点和下划线';
+          }
+          return true;
+        },
       },
-    });
+    ]);
 
-    const modelId = (modelIdResponse as any).modelId;
-    const baseURL = (baseURLResponse as any).baseURL;
-    const apiKey = (apiKeyResponse as any).apiKey;
-    const model = (modelResponse as any).model;
+    const { modelId, baseURL, apiKey, model } = response;
 
     const success = addModel(modelId, {
       baseURL: baseURL || '',
@@ -226,7 +227,11 @@ export function handleModelConfig(modelId?: string) {
   );
 }
 
-export async function handleModelUpdate(modelId?: string, field?: string, value?: string) {
+export async function handleModelUpdate(
+  modelId?: string,
+  field?: keyof ModelConfig,
+  value?: string
+) {
   if (!modelId || !field || value === undefined) {
     console.log(chalk.red('❌ 使用方法: termchat model update <model-id> <field> <value>'));
     console.log(chalk.yellow('💡 示例: termchat model update openai-gpt-4 apiKey your-api-key'));
@@ -253,7 +258,7 @@ export async function handleModelUpdate(modelId?: string, field?: string, value?
 
   console.log(chalk.cyan.bold(`\n🔧 更新模型配置: ${model.model}\n`));
 
-  const currentValue = (model as any)[field];
+  const currentValue = model[field];
   if (currentValue) {
     const displayValue =
       field === 'apiKey'
@@ -268,7 +273,7 @@ export async function handleModelUpdate(modelId?: string, field?: string, value?
     field === 'apiKey' ? `${value.substring(0, 4)}...${value.substring(value.length - 4)}` : value;
   console.log(`新 ${field}: ${chalk.white(displayNewValue)}\n`);
 
-  const success = updateModel(modelId, { [field]: value } as Partial<ModelConfig>);
+  const success = updateModel(modelId, { [field]: value });
   if (success) {
     console.log(chalk.green(`✅ 已更新 ${field} = ${displayNewValue}`));
   } else {
@@ -305,15 +310,16 @@ export async function handleModelSelect() {
       };
     });
 
-    const response = await enquirer.default.prompt({
+    const response = await enquirer.default.prompt<{ selectedModelId: string }>({
       type: 'select',
       name: 'selectedModelId',
       message: '选择要查看的模型:',
+      // @ts-ignore
       choices: choices,
       initial: defaultModelId,
-    } as any);
+    });
 
-    const selectedModelId = (response as any).selectedModelId;
+    const selectedModelId = response.selectedModelId;
 
     handleModelSet(selectedModelId);
   } catch (error) {
