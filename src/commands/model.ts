@@ -88,9 +88,9 @@ export async function handleModelAdd() {
   console.log(chalk.cyan.bold('\n➕ 添加新模型\n'));
 
   try {
-    const enquirer = await import('enquirer');
+    const inquirer = await import('inquirer');
 
-    const response = await enquirer.default.prompt<{
+    const response = await inquirer.default.prompt<{
       modelId: string;
       baseURL: string;
       apiKey: string;
@@ -100,7 +100,7 @@ export async function handleModelAdd() {
         type: 'input',
         name: 'modelId',
         message: '模型ID (用于标识模型):',
-        initial: 'custom-model',
+        default: 'custom-model',
         validate: (value: string) => {
           if (!validateModelId(value)) {
             return '模型ID只能包含字母、数字、连字符和下划线';
@@ -116,7 +116,7 @@ export async function handleModelAdd() {
         type: 'input',
         name: 'baseURL',
         message: 'API基础URL:',
-        initial: 'https://',
+        default: 'https://',
         validate: (value: string) => {
           if (value && !validateUrl(value)) {
             return 'URL格式无效';
@@ -128,7 +128,7 @@ export async function handleModelAdd() {
         type: 'input',
         name: 'apiKey',
         message: 'API密钥:',
-        initial: 'sk-',
+        default: 'sk-',
         validate: (value: string) => {
           if (!validateApiKey(value)) {
             return 'API密钥格式无效，应以sk-开头';
@@ -140,7 +140,7 @@ export async function handleModelAdd() {
         type: 'input',
         name: 'model',
         message: '模型名称 (API模型标识符):',
-        initial: 'gpt-3.5-turbo',
+        default: 'gpt-3.5-turbo',
         validate: (value: string) => {
           if (!validateModelName(value)) {
             return '模型名称只能包含字母、数字、连字符、点和下划线';
@@ -167,7 +167,10 @@ export async function handleModelAdd() {
     }
   } catch (error) {
     const errorMessage = (error as any)?.message || '';
-    console.error(chalk.red('❌ 添加模型失败:'), errorMessage || error);
+
+    if (!errorMessage.includes('SIGINT')) {
+      console.error(chalk.red('❌ 添加模型失败:'), errorMessage || error);
+    }
   }
 }
 
@@ -285,7 +288,7 @@ export async function handleModelSelect() {
   console.log(chalk.cyan.bold('\n🎯 选择模型\n'));
 
   try {
-    const enquirer = await import('enquirer');
+    const inquirer = await import('inquirer');
 
     const models = getAllModels();
     const defaultModelId = getDefaultModel();
@@ -300,23 +303,20 @@ export async function handleModelSelect() {
       const isDefault = modelId === defaultModelId;
       const status = model.apiKey ? chalk.green('✅') : chalk.red('❌');
       const defaultMark = isDefault ? chalk.yellow(' (默认)') : '';
-      const description = model.apiKey ? '已配置API密钥' : '未配置API密钥';
+      const description = chalk.gray(model.apiKey ? '已配置API密钥' : '未配置API密钥');
 
       return {
-        name: modelId,
-        message: `${status} ${model.model}${defaultMark}`,
-        hint: description,
+        name: `${status} ${model.model}${defaultMark} ${description}`,
         value: modelId,
       };
     });
 
-    const response = await enquirer.default.prompt<{ selectedModelId: string }>({
+    const response = await inquirer.default.prompt<{ selectedModelId: string }>({
       type: 'select',
       name: 'selectedModelId',
       message: '选择要查看的模型:',
-      // @ts-ignore
       choices: choices,
-      initial: defaultModelId,
+      default: defaultModelId,
     });
 
     const selectedModelId = response.selectedModelId;
@@ -324,6 +324,9 @@ export async function handleModelSelect() {
     handleModelSet(selectedModelId);
   } catch (error) {
     const errorMessage = (error as any)?.message || '';
-    console.error(chalk.red('❌ 选择模型失败:'), errorMessage || error);
+
+    if (!errorMessage.includes('SIGINT')) {
+      console.error(chalk.red('❌ 选择模型失败:'), errorMessage || error);
+    }
   }
 }

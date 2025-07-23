@@ -63,24 +63,38 @@ function handleSpecialCommands(
   return false;
 }
 
-async function getUserInput(): Promise<string | null> {
+async function getUserInput() {
   try {
-    const enquirer = await import('enquirer');
-    const response = await enquirer.default.prompt<{ userInput: string }>({
+    const inquirer = await import('inquirer');
+
+    const response = await inquirer.default.prompt<{ userInput: string }>({
       type: 'input',
       name: 'userInput',
       message: chalk.cyan(`💬 > `),
+      validate: (input: string) => {
+        if (!input || !input.trim()) {
+          return '请输入有效的问题';
+        }
+        return true;
+      },
     });
-    const input = response.userInput.trim();
 
-    if (!input) {
+    const userInput = response.userInput.trim();
+
+    if (!userInput) {
       console.log(chalk.gray(`⚠️  ${MESSAGES.INVALID_INPUT}`));
       return null;
     }
 
-    return input;
+    return userInput;
   } catch (error) {
-    console.log(chalk.green(`\n${MESSAGES.GOODBYE}`));
+    const errorMessage = (error as any)?.message || '';
+
+    if (errorMessage.includes('SIGINT')) {
+      console.log(chalk.green(`\n${MESSAGES.GOODBYE}`));
+    } else {
+      console.error(chalk.red('❌ 获取用户输入失败:'), errorMessage || error);
+    }
     process.exit(0);
   }
 }

@@ -204,13 +204,13 @@ export async function handleConfigDelete() {
   console.log();
 
   try {
-    const enquirer = await import('enquirer');
+    const inquirer = await import('inquirer');
 
-    const response = await enquirer.default.prompt<{ confirmed: boolean }>({
+    const response = await inquirer.default.prompt<{ confirmed: boolean }>({
       type: 'confirm',
       name: 'confirmed',
       message: '确定要删除配置文件吗？',
-      initial: false,
+      default: false,
     });
 
     const confirmed = response.confirmed;
@@ -225,6 +225,8 @@ export async function handleConfigDelete() {
     }
   } catch (error) {
     const errorMessage = (error as any)?.message || '';
-    console.error(chalk.red('❌ 删除配置文件失败:'), errorMessage || error);
+    if (!errorMessage.includes('SIGINT')) {
+      console.error(chalk.red('❌ 删除配置文件失败:'), errorMessage || error);
+    }
   }
 }
