@@ -19,7 +19,7 @@ function createASCIITitle() {
     });
 
     return coloredLines.join('\n');
-  } catch (error) {
+  } catch {
     return chalk.cyan.bold('🤖 TERMINAL CHAT 🤖');
   }
 }
