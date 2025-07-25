@@ -4,8 +4,8 @@ import figlet from 'figlet';
 
 function createASCIITitle() {
   try {
-    const title = figlet.textSync('VOIDAI', {
-      font: 'Slant',
+    const title = figlet.textSync('> VOIDAI', {
+      font: 'DOS Rebel',
       horizontalLayout: 'default',
       verticalLayout: 'default',
     });
