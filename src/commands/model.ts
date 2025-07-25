@@ -26,7 +26,7 @@ export function handleModelList(options: ModelCommandOptions = {}) {
     } else {
       console.log(chalk.cyan.bold('\n📋 可用模型列表:\n'));
       console.log(chalk.gray('  (无可用模型)'));
-      console.log(chalk.cyan('\n💡 使用 `termchat model add` 添加模型'));
+      console.log(chalk.cyan('\n💡 使用 `voidai model add` 添加模型'));
     }
     return;
   }
@@ -56,23 +56,23 @@ export function handleModelList(options: ModelCommandOptions = {}) {
     console.log();
   }
 
-  console.log(chalk.cyan('💡 使用 `termchat model select` 图形化选择模型'));
-  console.log(chalk.cyan('💡 使用 `termchat model set <model-id>` 设置默认模型'));
-  console.log(chalk.cyan('💡 使用 `termchat model list --id` 只显示模型ID'));
+  console.log(chalk.cyan('💡 使用 `voidai model select` 图形化选择模型'));
+  console.log(chalk.cyan('💡 使用 `voidai model set <model-id>` 设置默认模型'));
+  console.log(chalk.cyan('💡 使用 `voidai model list --id` 只显示模型ID'));
 }
 
 export function handleModelSet(modelId?: string) {
   if (!modelId) {
-    console.log(chalk.red('❌ 使用方法: termchat model set <model-id>'));
-    console.log(chalk.yellow('💡 示例: termchat model set openai-gpt-4'));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.red('❌ 使用方法: voidai model set <model-id>'));
+    console.log(chalk.yellow('💡 示例: voidai model set openai-gpt-4'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
   const models = getAllModels();
   if (!models[modelId]) {
     console.log(chalk.red(`❌ 模型 "${modelId}" 不存在`));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
@@ -161,7 +161,7 @@ export async function handleModelAdd() {
 
     if (success) {
       console.log(chalk.green(`✅ 已添加模型: ${model}`));
-      console.log(chalk.cyan('💡 使用 `termchat model set <model-id>` 设置为默认模型'));
+      console.log(chalk.cyan('💡 使用 `voidai model set <model-id>` 设置为默认模型'));
     } else {
       console.log(chalk.red('❌ 添加模型失败'));
     }
@@ -176,16 +176,16 @@ export async function handleModelAdd() {
 
 export async function handleModelRemove(modelId?: string) {
   if (!modelId) {
-    console.log(chalk.red('❌ 使用方法: termchat model remove <model-id>'));
-    console.log(chalk.yellow('💡 示例: termchat model remove openai-gpt-4'));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.red('❌ 使用方法: voidai model remove <model-id>'));
+    console.log(chalk.yellow('💡 示例: voidai model remove openai-gpt-4'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
   const models = getAllModels();
   if (!models[modelId]) {
     console.log(chalk.red(`❌ 模型 "${modelId}" 不存在`));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
@@ -202,16 +202,16 @@ export async function handleModelRemove(modelId?: string) {
 
 export function handleModelConfig(modelId?: string) {
   if (!modelId) {
-    console.log(chalk.red('❌ 使用方法: termchat model config <model-id>'));
-    console.log(chalk.yellow('💡 示例: termchat model config openai-gpt-4'));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.red('❌ 使用方法: voidai model config <model-id>'));
+    console.log(chalk.yellow('💡 示例: voidai model config openai-gpt-4'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
   const model = getModelConfig(modelId);
   if (!model) {
     console.log(chalk.red(`❌ 模型 "${modelId}" 不存在`));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
@@ -236,12 +236,12 @@ export async function handleModelUpdate(
   value?: string
 ) {
   if (!modelId || !field || value === undefined) {
-    console.log(chalk.red('❌ 使用方法: termchat model update <model-id> <field> <value>'));
-    console.log(chalk.yellow('💡 示例: termchat model update openai-gpt-4 apiKey your-api-key'));
+    console.log(chalk.red('❌ 使用方法: voidai model update <model-id> <field> <value>'));
+    console.log(chalk.yellow('💡 示例: voidai model update openai-gpt-4 apiKey your-api-key'));
     console.log(
-      chalk.yellow('💡 示例: termchat model update openai-gpt-4 baseURL https://api.openai.com/v1')
+      chalk.yellow('💡 示例: voidai model update openai-gpt-4 baseURL https://api.openai.com/v1')
     );
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
@@ -255,7 +255,7 @@ export async function handleModelUpdate(
   const model = getModelConfig(modelId);
   if (!model) {
     console.log(chalk.red(`❌ 模型 "${modelId}" 不存在`));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return;
   }
 
@@ -295,7 +295,7 @@ export async function handleModelSelect() {
 
     if (!models || Object.keys(models).length === 0) {
       console.log(chalk.yellow('⚠️ 没有可用的模型'));
-      console.log(chalk.cyan('💡 使用 `termchat model add` 添加模型'));
+      console.log(chalk.cyan('💡 使用 `voidai model add` 添加模型'));
       return;
     }
 

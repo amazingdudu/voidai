@@ -1,4 +1,4 @@
-# Terminal Chat
+# VoidAI
 
 一个简单易用的终端AI聊天助手，支持流式输出和Markdown渲染，支持多模型管理。
 
@@ -13,14 +13,14 @@
 ## 安装
 
 ```bash
-npm install -g terminal-chat
+npm install -g voidai
 ```
 
 或本地安装：
 
 ```bash
 git clone <repository-url>
-cd terminal-chat
+cd voidai
 npm install
 npm link
 ```
@@ -30,7 +30,7 @@ npm link
 ### 1. 初始化配置
 
 ```bash
-termchat config init
+voidai config init
 ```
 
 ### 2. 配置模型
@@ -38,53 +38,53 @@ termchat config init
 查看可用模型：
 
 ```bash
-termchat model list
+voidai model list
 ```
 
 设置模型API密钥：
 
 ```bash
-termchat config set "MODELS.openai-gpt-3.5-turbo.apiKey" "your-api-key"
+voidai config set "MODELS.openai-gpt-3.5-turbo.apiKey" "your-api-key"
 ```
 
 ### 3. 开始聊天
 
 ```bash
-termchat
+voidai
 ```
 
 ## 命令参考
 
 ### 聊天命令
 
-| 命令                          | 描述                 | 示例                            |
-| ----------------------------- | -------------------- | ------------------------------- |
-| `termchat`                    | 开始聊天会话         | `termchat`                      |
-| `termchat --model <model-id>` | 使用指定模型开始聊天 | `termchat --model openai-gpt-4` |
-| `termchat --stream`           | 启用流式输出         | `termchat --stream`             |
+| 命令                        | 描述                 | 示例                          |
+| --------------------------- | -------------------- | ----------------------------- |
+| `voidai`                    | 开始聊天会话         | `voidai`                      |
+| `voidai --model <model-id>` | 使用指定模型开始聊天 | `voidai --model openai-gpt-4` |
+| `voidai --stream`           | 启用流式输出         | `voidai --stream`             |
 
 ### 配置管理命令
 
-| 命令                                | 描述                       | 示例                                                   |
-| ----------------------------------- | -------------------------- | ------------------------------------------------------ |
-| `termchat config init`              | 初始化配置文件             | `termchat config init`                                 |
-| `termchat config list`              | 列出所有配置项             | `termchat config list`                                 |
-| `termchat config get <key>`         | 获取指定配置项的值         | `termchat config get DEFAULT_MODEL`                    |
-| `termchat config set <key> <value>` | 设置配置项的值             | `termchat config set SYSTEM_PROMPT "你是一个编程助手"` |
-| `termchat config delete`            | 删除配置文件（需二次确认） | `termchat config delete`                               |
+| 命令                              | 描述                       | 示例                                                 |
+| --------------------------------- | -------------------------- | ---------------------------------------------------- |
+| `voidai config init`              | 初始化配置文件             | `voidai config init`                                 |
+| `voidai config list`              | 列出所有配置项             | `voidai config list`                                 |
+| `voidai config get <key>`         | 获取指定配置项的值         | `voidai config get DEFAULT_MODEL`                    |
+| `voidai config set <key> <value>` | 设置配置项的值             | `voidai config set SYSTEM_PROMPT "你是一个编程助手"` |
+| `voidai config delete`            | 删除配置文件（需二次确认） | `voidai config delete`                               |
 
 ### 模型管理命令
 
-| 命令                                               | 描述               | 示例                                                |
-| -------------------------------------------------- | ------------------ | --------------------------------------------------- |
-| `termchat model list`                              | 列出所有可用模型   | `termchat model list`                               |
-| `termchat model list --id`                         | 只显示模型ID列表   | `termchat model list --id`                          |
-| `termchat model add`                               | 交互式添加新模型   | `termchat model add`                                |
-| `termchat model set <model-id>`                    | 设置默认模型       | `termchat model set openai-gpt-4`                   |
-| `termchat model remove <model-id>`                 | 删除指定模型       | `termchat model remove my-custom-model`             |
-| `termchat model config <model-id>`                 | 查看指定模型的配置 | `termchat model config openai-gpt-4`                |
-| `termchat model update <model-id> <field> <value>` | 更新模型配置字段   | `termchat model update openai-gpt-4 apiKey new-key` |
-| `termchat model select`                            | 图形化选择模型     | `termchat model select`                             |
+| 命令                                             | 描述               | 示例                                              |
+| ------------------------------------------------ | ------------------ | ------------------------------------------------- |
+| `voidai model list`                              | 列出所有可用模型   | `voidai model list`                               |
+| `voidai model list --id`                         | 只显示模型ID列表   | `voidai model list --id`                          |
+| `voidai model add`                               | 交互式添加新模型   | `voidai model add`                                |
+| `voidai model set <model-id>`                    | 设置默认模型       | `voidai model set openai-gpt-4`                   |
+| `voidai model remove <model-id>`                 | 删除指定模型       | `voidai model remove my-custom-model`             |
+| `voidai model config <model-id>`                 | 查看指定模型的配置 | `voidai model config openai-gpt-4`                |
+| `voidai model update <model-id> <field> <value>` | 更新模型配置字段   | `voidai model update openai-gpt-4 apiKey new-key` |
+| `voidai model select`                            | 图形化选择模型     | `voidai model select`                             |
 
 ### 配置项说明
 
@@ -119,7 +119,7 @@ termchat
 你可以添加任何兼容OpenAI API格式的模型：
 
 ```bash
-termchat model add
+voidai model add
 ```
 
 支持以下提供商：
@@ -130,7 +130,7 @@ termchat model add
 
 ## 配置文件
 
-配置文件位置：`~/.termchatrc`
+配置文件位置：`~/.voidairc`
 
 示例配置：
 
@@ -154,29 +154,29 @@ termchat model add
 
 ```bash
 # 使用图形化界面选择模型
-termchat model select
+voidai model select
 
 # 或直接指定模型
-termchat --model openai-gpt-4
+voidai --model openai-gpt-4
 ```
 
 ### 2. 批量配置模型
 
 ```bash
 # 设置多个模型的API密钥
-termchat config set "MODELS.openai-gpt-3.5-turbo.apiKey" "sk-..."
-termchat config set "MODELS.openai-gpt-4.apiKey" "sk-..."
-termchat config set "MODELS.claude-3-sonnet.apiKey" "sk-ant-..."
+voidai config set "MODELS.openai-gpt-3.5-turbo.apiKey" "sk-..."
+voidai config set "MODELS.openai-gpt-4.apiKey" "sk-..."
+voidai config set "MODELS.claude-3-sonnet.apiKey" "sk-ant-..."
 ```
 
 ### 3. 查看模型状态
 
 ```bash
 # 查看所有模型及其状态
-termchat model list
+voidai model list
 
 # 只查看模型ID
-termchat model list --id
+voidai model list --id
 ```
 
 ## 开发

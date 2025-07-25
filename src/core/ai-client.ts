@@ -32,13 +32,13 @@ export function validateModel(modelId: string | null = null): boolean {
 
   if (!modelConfig) {
     console.error(chalk.red(`❌ 模型 "${targetModelId}" 不存在`));
-    console.log(chalk.cyan('💡 使用 `termchat model list` 查看可用模型'));
+    console.log(chalk.cyan('💡 使用 `voidai model list` 查看可用模型'));
     return false;
   }
 
   if (!modelConfig.apiKey) {
     console.error(chalk.red(`❌ 模型 "${targetModelId}" 未配置API密钥`));
-    console.log(chalk.cyan(`💡 使用 'termchat model config ${targetModelId}' 配置API密钥`));
+    console.log(chalk.cyan(`💡 使用 'voidai model config ${targetModelId}' 配置API密钥`));
     return false;
   }
 

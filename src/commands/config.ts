@@ -25,8 +25,8 @@ export function handleConfigInit() {
     createDefaultConfig();
   }
 
-  console.log(chalk.cyan('\n💡 提示: 使用 `termchat config list` 查看当前配置'));
-  console.log(chalk.cyan('💡 提示: 使用 `termchat model add` 添加模型'));
+  console.log(chalk.cyan('\n💡 提示: 使用 `voidai config list` 查看当前配置'));
+  console.log(chalk.cyan('💡 提示: 使用 `voidai model add` 添加模型'));
 }
 
 export function handleConfigList() {
@@ -36,8 +36,8 @@ export function handleConfigList() {
 
   if (Object.keys(allConfig).length === 0) {
     console.log(chalk.gray('  (无配置项)'));
-    console.log(chalk.cyan('\n💡 使用 `termchat config init` 初始化配置文件'));
-    console.log(chalk.cyan('💡 使用 `termchat model add` 添加模型'));
+    console.log(chalk.cyan('\n💡 使用 `voidai config init` 初始化配置文件'));
+    console.log(chalk.cyan('💡 使用 `voidai model add` 添加模型'));
     return;
   }
 
@@ -81,9 +81,9 @@ export function handleConfigList() {
             const defaultMark = isDefault ? chalk.yellow(' (默认)') : '';
             console.log(`    ${status} ${chalk.gray(modelId)}${defaultMark} - ${model.model}`);
           }
-          console.log(chalk.cyan('    💡 使用 `termchat model list` 查看详细模型信息'));
+          console.log(chalk.cyan('    💡 使用 `voidai model list` 查看详细模型信息'));
           console.log(
-            chalk.cyan('    💡 使用 `termchat config get MODELS.<model-id>.<field>` 查看具体配置')
+            chalk.cyan('    💡 使用 `voidai config get MODELS.<model-id>.<field>` 查看具体配置')
           );
         } else {
           console.log(`  ${chalk.green('MODELS'.padEnd(20))}: ${chalk.gray('(无模型)')}`);
@@ -107,10 +107,10 @@ export function handleConfigList() {
 
 export function handleConfigGet(key?: string) {
   if (!key) {
-    console.log(chalk.red('❌ 使用方法: termchat config get <key>'));
-    console.log(chalk.yellow('💡 示例: termchat config get DEFAULT_MODEL'));
-    console.log(chalk.yellow('💡 示例: termchat config get MODELS.openai-gpt-4.apiKey'));
-    console.log(chalk.cyan('💡 使用 `termchat config list` 查看所有配置'));
+    console.log(chalk.red('❌ 使用方法: voidai config get <key>'));
+    console.log(chalk.yellow('💡 示例: voidai config get DEFAULT_MODEL'));
+    console.log(chalk.yellow('💡 示例: voidai config get MODELS.openai-gpt-4.apiKey'));
+    console.log(chalk.cyan('💡 使用 `voidai config list` 查看所有配置'));
     return;
   }
 
@@ -125,20 +125,20 @@ export function handleConfigGet(key?: string) {
 
     if (key.startsWith('MODELS.')) {
       console.log(
-        chalk.cyan('\n💡 提示: 也可以使用 `termchat model config <model-id>` 查看模型配置')
+        chalk.cyan('\n💡 提示: 也可以使用 `voidai model config <model-id>` 查看模型配置')
       );
     }
   } else {
     console.log(chalk.yellow(`⚠️ 配置项 "${key}" 不存在或未设置`));
-    console.log(chalk.cyan(`💡 使用 'termchat config set ${key} <value>' 设置此配置项`));
+    console.log(chalk.cyan(`💡 使用 'voidai config set ${key} <value>' 设置此配置项`));
   }
 }
 
 export async function handleConfigSet(key?: string, value?: string) {
   if (!key || value === undefined) {
-    console.log(chalk.red('❌ 使用方法: termchat config set <key> <value>'));
-    console.log(chalk.yellow('💡 示例: termchat config set DEFAULT_MODEL openai-gpt-4'));
-    console.log(chalk.yellow('💡 示例: termchat config set MODELS.openai-gpt-4.apiKey your-key'));
+    console.log(chalk.red('❌ 使用方法: voidai config set <key> <value>'));
+    console.log(chalk.yellow('💡 示例: voidai config set DEFAULT_MODEL openai-gpt-4'));
+    console.log(chalk.yellow('💡 示例: voidai config set MODELS.openai-gpt-4.apiKey your-key'));
     return;
   }
 
@@ -170,7 +170,7 @@ export async function handleConfigSet(key?: string, value?: string) {
     if (key.startsWith('MODELS.')) {
       console.log(
         chalk.cyan(
-          '\n💡 提示: 也可以使用 `termchat model update <model-id> <field> <value>` 更新模型配置'
+          '\n💡 提示: 也可以使用 `voidai model update <model-id> <field> <value>` 更新模型配置'
         )
       );
     }
@@ -186,7 +186,7 @@ export async function handleConfigDelete() {
 
   if (!configExists()) {
     console.log(chalk.yellow('⚠️ 配置文件不存在'));
-    console.log(chalk.cyan('💡 使用 `termchat config init` 初始化配置文件'));
+    console.log(chalk.cyan('💡 使用 `voidai config init` 初始化配置文件'));
     return;
   }
 
@@ -219,7 +219,7 @@ export async function handleConfigDelete() {
       const fs = await import('fs');
       fs.unlinkSync(configPath);
       console.log(chalk.green('✅ 配置文件已删除'));
-      console.log(chalk.cyan('💡 使用 `termchat config init` 重新初始化配置'));
+      console.log(chalk.cyan('💡 使用 `voidai config init` 重新初始化配置'));
     } else {
       console.log(chalk.green('👋 取消删除配置文件'));
     }

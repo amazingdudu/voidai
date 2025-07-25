@@ -4,7 +4,7 @@ import figlet from 'figlet';
 
 function createASCIITitle() {
   try {
-    const title = figlet.textSync('TERMINAL CHAT', {
+    const title = figlet.textSync('VOIDAI', {
       font: 'Slant',
       horizontalLayout: 'default',
       verticalLayout: 'default',
@@ -20,7 +20,7 @@ function createASCIITitle() {
 
     return coloredLines.join('\n');
   } catch {
-    return chalk.cyan.bold('🤖 TERMINAL CHAT 🤖');
+    return chalk.cyan.bold('🤖 VOIDAI 🤖');
   }
 }
 

@@ -25,7 +25,7 @@ import type { CommandOptions } from './src/types/index.js';
 const program = new Command();
 
 program
-  .name('terminal-chat')
+  .name('voidai')
   .description('AI终端助手')
   .version('1.0.0')
   .option('-s, --stream', '启用流式输出模式')

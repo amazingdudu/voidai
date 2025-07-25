@@ -24,7 +24,7 @@ const defaultConfig: Config = {
   },
 };
 
-const CONFIG_FILE_PATH = path.join(os.homedir(), '.termchatrc');
+const CONFIG_FILE_PATH = path.join(os.homedir(), '.voidairc');
 
 export function getConfigPath(): string {
   return CONFIG_FILE_PATH;
@@ -36,7 +36,7 @@ export function configExists(): boolean {
 
 export function loadConfig(): void {
   try {
-    const config = rc('termchat', defaultConfig);
+    const config = rc('voidairc', defaultConfig);
 
     Object.entries(config).forEach(([key, value]) => {
       if (key.startsWith('_') || key === 'config' || key === 'configs') return;
@@ -48,7 +48,7 @@ export function loadConfig(): void {
     console.log(
       configExists()
         ? chalk.green('✅ 已从配置文件加载设置')
-        : chalk.yellow('⚠️ 配置文件不存在，请先运行 `termchat config init` 初始化配置')
+        : chalk.yellow('⚠️ 配置文件不存在，请先运行 `voidai config init` 初始化配置')
     );
 
     if (!process.env['DEFAULT_MODEL']) {
@@ -76,9 +76,7 @@ export function createDefaultConfig(): boolean {
 
     console.log(chalk.green('✅ 已创建默认配置文件'));
     console.log(chalk.cyan(`📁 配置文件位置: ${CONFIG_FILE_PATH}`));
-    console.log(
-      chalk.yellow('💡 请使用 `termchat config set OPENAI_API_KEY your-key` 设置API密钥')
-    );
+    console.log(chalk.yellow('💡 请使用 `voidai config set OPENAI_API_KEY your-key` 设置API密钥'));
 
     return true;
   } catch (error) {
@@ -99,7 +97,7 @@ export function readConfig(): Record<string, any> {
 }
 
 export function getAllConfig(): Record<string, any> {
-  const config = rc('termchat', defaultConfig);
+  const config = rc('voidai', defaultConfig);
   const filteredConfig: Record<string, any> = {};
   Object.entries(config).forEach(([key, value]) => {
     if (!key.startsWith('_') && key !== 'config' && key !== 'configs') {
@@ -110,7 +108,7 @@ export function getAllConfig(): Record<string, any> {
 }
 
 export function getConfigValue(key: string): string | null {
-  const config = rc('termchat', defaultConfig);
+  const config = rc('voidai', defaultConfig);
 
   if (key.includes('.')) {
     const keys = key.split('.');
@@ -167,7 +165,7 @@ export function setConfigValue(key: string, value: string): boolean {
 }
 
 export function getAllModels(): Record<string, ModelConfig> {
-  const config = rc('termchat', defaultConfig);
+  const config = rc('voidai', defaultConfig);
   const models: Record<string, ModelConfig> = { ...defaultConfig.MODELS };
 
   if (config.MODELS) {
@@ -201,7 +199,7 @@ export function getAllModels(): Record<string, ModelConfig> {
 }
 
 export function getModelConfig(modelId: string): ModelConfig | null {
-  const config = rc('termchat', defaultConfig);
+  const config = rc('voidai', defaultConfig);
 
   if (!defaultConfig.MODELS[modelId]) {
     if (config.MODELS && config.MODELS[modelId]) {
@@ -229,7 +227,7 @@ export function getModelConfig(modelId: string): ModelConfig | null {
 }
 
 export function getDefaultModel(): string {
-  const config = rc('termchat', defaultConfig);
+  const config = rc('voidai', defaultConfig);
   return config['DEFAULT_MODEL'] || defaultConfig['DEFAULT_MODEL'];
 }
 
